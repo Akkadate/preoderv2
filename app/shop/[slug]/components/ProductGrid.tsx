@@ -8,7 +8,10 @@ import { ShoppingCart, Check } from 'lucide-react'
 import { useCartStore } from '@/lib/cart-store'
 import { useState } from 'react'
 
-interface ProductWithStock extends Product {
+// Use serialized types for client components (Date becomes string, Decimal becomes number)
+interface ProductWithStock extends Omit<Product, 'createdAt' | 'price'> {
+    price: number
+    createdAt: string
     soldCount: number
     remaining: number | null
     isInStock: boolean
