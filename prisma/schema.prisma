@@ -1,0 +1,206 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------
+// 1. ENUMS (ตัวกำหนดประเภท)
+// --------------------------------------
+
+enum ShopType {
+  BUYING_AGENT // รับหิ้ว: เน้นรอบยาวๆ สินค้าหลากหลาย
+  KITCHEN      // ครัว/อาหาร: เน้นรอบรายวัน เมนูหมุนเวียน
+}
+
+enum OrderStatus {
+  PENDING      // รอจ่ายเงิน
+  PAID_WAITING // จ่ายแล้ว รอตรวจสอบ (แนบสลิปแล้ว)
+  CONFIRMED    // ยืนยันยอด/กำลังเตรียมของ
+  SHIPPED      // จัดส่งแล้ว (มีเลขพัสดุ/ไรเดอร์รับแล้ว)
+  COMPLETED    // ลูกค้าได้รับของแล้ว
+  CANCELLED    // ยกเลิก
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  QR_CODE
+  COD // เก็บเงินปลายทาง
+}
+
+// --------------------------------------
+// 2. CORE MODELS (ผู้ใช้งานและร้านค้า)
+// --------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?   // กรณีใช้ Login แบบธรรมดา (ถ้าใช้ NextAuth อาจไม่ต้องใช้)
+  image         String?
+  createdAt     DateTime  @default(now())
+  
+  // Relations
+  ownedShops    Shop[]    @relation("Owner")
+  orders        Order[]   // ประวัติการสั่งซื้อในฐานะลูกค้า
+}
+
+model Shop {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique // เช่น app.com/shop/jeth-kitchen
+  description   String?
+  logo          String?
+  type          ShopType  @default(BUYING_AGENT)
+  isActive      Boolean   @default(true)
+  
+  // Settings (ใช้ JSON เพื่อความยืดหยุ่น ปรับเปลี่ยนได้ไม่ต้องแก้ตาราง)
+  bankInfo      Json?     // { bankName: "KBank", accNo: "123...", accName: "..." }
+  shippingRates Json?     // Config ค่าส่งตามน้ำหนัก หรือ ระยะทาง
+  
+  // Telegram Notifications
+  telegramBotToken String? // Bot Token จาก @BotFather
+  telegramChatId   String? // Chat ID สำหรับส่งแจ้งเตือน
+  
+  ownerId       String
+  owner         User      @relation("Owner", fields: [ownerId], references: [id])
+
+  // Relations
+  rounds        Round[]
+  products      Product[]
+  customers     Customer[] // ระบบ CRM เก็บลูกค้าประจำร้าน
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// --------------------------------------
+// 3. PRODUCT & ROUND (หัวใจของระบบ)
+// --------------------------------------
+
+// รอบการขาย (สำคัญมากสำหรับโมเดลนี้)
+model Round {
+  id            String    @id @default(cuid())
+  name          String    // เช่น "รอบบินญี่ปุ่น ม.ค.", "เมนูวันศุกร์ที่ 12"
+  
+  // Timing
+  opensAt       DateTime  // เวลาเปิดรับออเดอร์
+  closesAt      DateTime  // เวลาปิดรับ (Cut-off time)
+  
+  // Delivery
+  shippingStart DateTime? // เริ่มส่งของเมื่อไหร่ (Pre-order)
+  pickupDate    DateTime? // วันที่ไรเดอร์มารับ (Kitchen)
+  
+  status        String    @default("OPEN") // OPEN, CLOSED, FULFILLED
+  
+  shopId        String
+  shop          Shop      @relation(fields: [shopId], references: [id])
+  
+  orders        Order[]
+
+  createdAt     DateTime  @default(now())
+}
+
+model Product {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal   @db.Decimal(10, 2) // ใช้ Decimal เสมอสำหรับเรื่องเงิน
+  images        String[]  // เก็บรูปภาพหลายรูป
+  
+  shopId        String
+  shop          Shop      @relation(fields: [shopId], references: [id])
+  
+  // Inventory Control
+  isAvailable   Boolean   @default(true)
+  limitPerRound Int?      // จำกัดจำนวนต่อรอบ (เช่น รับแค่ 20 ชิ้น)
+  
+  // Variants/Options (ใช้ JSON เพราะแต่ละร้าน Option ต่างกันมาก)
+  // Ex: [{ name: "Size", choices: ["S", "M", "L"] }, { name: "Sweetness", choices: ["0%", "50%"] }]
+  optionsConfig Json?     
+
+  orderItems    OrderItem[]
+  
+  createdAt     DateTime  @default(now())
+}
+
+// --------------------------------------
+// 4. ORDER SYSTEM (การสั่งซื้อ)
+// --------------------------------------
+
+model Order {
+  id            String      @id @default(cuid())
+  code          String      // รหัสออเดอร์สั้นๆ ให้อ่านง่าย เช่น "ORD-8821"
+  
+  totalAmount   Decimal     @db.Decimal(10, 2)
+  shippingCost  Decimal     @db.Decimal(10, 2) @default(0)
+  discount      Decimal     @db.Decimal(10, 2) @default(0)
+  grandTotal    Decimal     @db.Decimal(10, 2)
+  
+  status        OrderStatus @default(PENDING)
+  paymentMethod PaymentMethod @default(BANK_TRANSFER)
+  
+  // Evidence
+  slipImage     String?     // รูปสลิปโอนเงิน
+  paidAt        DateTime?   // เวลาที่โอน
+  
+  // Shipping Info
+  trackingCode  String?     // เลขพัสดุ
+  shippingAddress Json?     // { name, tel, address, location: {lat, lng} }
+  
+  // Relations
+  shopId        String
+  roundId       String
+  round         Round       @relation(fields: [roundId], references: [id])
+  
+  userId        String?     // กรณี Login
+  user          User?       @relation(fields: [userId], references: [id])
+  
+  customerId    String?     // ลิงก์กับ CRM ของร้าน
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  
+  items         OrderItem[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model OrderItem {
+  id            String    @id @default(cuid())
+  name          String    // Snapshot ชื่อสินค้า ณ ตอนสั่ง (เผื่ออนาคตเปลี่ยนชื่อ)
+  price         Decimal   @db.Decimal(10, 2) // Snapshot ราคา ณ ตอนสั่ง
+  quantity      Int
+  totalPrice    Decimal   @db.Decimal(10, 2)
+  
+  // Selected Options
+  // Ex: { "Size": "M", "Sweetness": "50%" }
+  selectedOptions Json?   
+  
+  orderId       String
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id])
+}
+
+// --------------------------------------
+// 5. CRM (ลูกค้าประจำร้าน)
+// --------------------------------------
+model Customer {
+  id            String    @id @default(cuid())
+  name          String
+  contactInfo   String    // LINE ID หรือ เบอร์โทร
+  address       String?
+  
+  shopId        String
+  shop          Shop      @relation(fields: [shopId], references: [id])
+  orders        Order[]
+  
+  createdAt     DateTime  @default(now())
+}
