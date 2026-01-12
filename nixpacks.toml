@@ -1,0 +1,5 @@
+# Railway/Nixpacks configuration
+# Override the default install command to avoid npm ci issues
+
+[phases.install]
+cmds = ["npm install"]
