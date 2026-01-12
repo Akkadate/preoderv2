@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { v2 as cloudinary } from 'cloudinary'
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function POST(request: NextRequest) {
     try {
@@ -26,24 +31,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
 
-        // Create uploads directory if it doesn't exist
-        const uploadsDir = join(process.cwd(), 'public', 'uploads', 'slips')
-        if (!existsSync(uploadsDir)) {
-            await mkdir(uploadsDir, { recursive: true })
-        }
-
-        // Generate unique filename
-        const ext = file.name.split('.').pop() || 'jpg'
-        const filename = `${orderId}-${Date.now()}.${ext}`
-        const filepath = join(uploadsDir, filename)
-
-        // Save file
+        // Convert file to base64
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
-        await writeFile(filepath, buffer)
+        const base64 = buffer.toString('base64')
+        const dataUri = `data:${file.type};base64,${base64}`
 
-        // Update order with slip image path
-        const slipUrl = `/uploads/slips/${filename}`
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(dataUri, {
+            folder: 'pre-order/slips',
+            resource_type: 'auto',
+            public_id: `${orderId}-${Date.now()}`,
+        })
+
+        // Update order with slip image URL
+        const slipUrl = result.secure_url
         const updatedOrder = await prisma.order.update({
             where: { id: orderId },
             data: {
