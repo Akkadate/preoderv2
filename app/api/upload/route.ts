@@ -1,6 +1,12 @@
-import { writeFile, mkdir } from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
-import path from 'path'
+import { v2 as cloudinary } from 'cloudinary'
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function POST(request: NextRequest) {
     try {
@@ -11,26 +17,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'No file uploaded' }, { status: 400 })
         }
 
+        // Convert file to base64
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
+        const base64 = buffer.toString('base64')
+        const dataUri = `data:${file.type};base64,${base64}`
 
-        // Generate unique filename
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`
-        const filename = `${uniqueSuffix}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`
-
-        // Save to public/uploads
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-
-        // Ensure directory exists (important for Railway Volume)
-        await mkdir(uploadDir, { recursive: true })
-
-        const filepath = path.join(uploadDir, filename)
-
-        await writeFile(filepath, buffer)
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(dataUri, {
+            folder: 'pre-order',
+            resource_type: 'auto',
+        })
 
         return NextResponse.json({
             success: true,
-            url: `/uploads/${filename}`
+            url: result.secure_url
         })
 
     } catch (error) {
