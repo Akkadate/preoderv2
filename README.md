@@ -34,3 +34,62 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+---
+1. Authentication (แนะนำ!)
+Login/Logout สำหรับ Admin
+ป้องกันหน้า /admin/*
+2. LINE Notify
+แจ้งเตือนเมื่อมีคำสั่งซื้อใหม่
+แจ้งเตือนเมื่อลูกค้าแนบสลิป
+3. จัดการสินค้า
+เพิ่ม/แก้ไข/ลบสินค้า
+อัพโหลดรูปภาพ
+จัดการตัวเลือก (Size, Color)
+4. จัดการรอบขาย
+สร้าง/ปิด/เปิดรอบ
+ตั้งวัน-เวลา deadline
+5. รายงาน
+รายงานยอดขายรายวัน/เดือน
+Export Excel
+6. แก้ไขหน้าตั้งค่า
+แก้ไขข้อมูลร้านได้จริง
+อัพโหลดโลโก้
+
+
+Demo Credentials
+Email: 
+owner@japan-preorder.com
+Password: demo123
+
+🔧 ส่วนที่ยังไม่สมบูรณ์
+จัดการสินค้า - เพิ่ม/แก้ไข/ลบสินค้าใน Admin (ตอนนี้ใช้ seed data อย่างเดียว)
+จัดการรอบขาย - สร้าง/ปิดรอบใน Admin
+แก้ไขตั้งค่าร้าน - บันทึกข้อมูลธนาคาร/ค่าส่งได้จริง (ตอนนี้แสดงเฉยๆ)
+LINE Notify - แจ้งเตือนเมื่อมี order ใหม่/แนบสลิป
+
+netstat -ano | findstr :3000
+TCP    0.0.0.0:3000    0.0.0.0:0    LISTENING    12345
+taskkill /PID 12345 /F
+
+หรือ
+for /f "tokens=5" %a in ('netstat -ano ^| findstr :3000') do taskkill /PID %a /F
+
+หรือ 
+Get-NetTCPConnection -LocalPort 3000 | `
+  Select-Object -Property OwningProcess | `
+  ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+
+Remove-Item -Recurse -Force .next
+node node_modules/next/dist/bin/next dev
+
+
+cmd / "set DATABASE_URL="postgresql://postgres:ckRrxUxZHphSyygdSZpqCFnLkTytQSCB@yamabiko.proxy.rlwy.net:57015/railway && npx prisma db seed"
+
+
+
+https://console.cloudinary.com/app/c-46c5e79a1104fd684bf2a5a2a338d6/image/getting-started
+Cloud name ds7ysdgvn
+api key    226152673865869
+api secret cYj7uw2RUxjjTVeC2GwhVAllrYM
