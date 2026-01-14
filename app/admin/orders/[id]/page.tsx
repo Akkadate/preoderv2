@@ -8,6 +8,13 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { OrderActions } from './OrderActions'
 import { ImageDialog } from '@/components/image-dialog'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for LocationView (Leaflet requires window)
+const LocationView = dynamic(
+    () => import('@/components/LocationView').then(mod => ({ default: mod.LocationView })),
+    { ssr: false, loading: () => <div className="h-[150px] bg-muted rounded-lg animate-pulse" /> }
+)
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -90,6 +97,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
         address?: string
         lineId?: string
         note?: string
+        location?: { lat: number; lng: number } | null
     } | null
 
     return (
@@ -295,6 +303,18 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                     {shippingAddress.note && (
                                         <div className="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded text-sm">
                                             <strong>หมายเหตุ:</strong> {shippingAddress.note}
+                                        </div>
+                                    )}
+                                    {shippingAddress.location && (
+                                        <div className="mt-3 pt-3 border-t">
+                                            <p className="text-sm font-medium mb-2 flex items-center gap-1">
+                                                <MapPin className="h-4 w-4" />
+                                                ตำแหน่งบนแผนที่
+                                            </p>
+                                            <LocationView
+                                                location={shippingAddress.location}
+                                                size={150}
+                                            />
                                         </div>
                                     )}
                                 </>
