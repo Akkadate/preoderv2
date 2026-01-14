@@ -24,7 +24,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { CheckCircle, Truck, XCircle, Loader2, Printer, Share2 } from 'lucide-react'
+import { CheckCircle, Truck, XCircle, Loader2, Printer, Share2, Copy, Check } from 'lucide-react'
 import { ImageDialog } from '@/components/image-dialog'
 
 interface OrderActionsProps {
@@ -38,6 +38,8 @@ export function OrderActions({ orderId, currentStatus, slipImage }: OrderActions
     const [loading, setLoading] = useState(false)
     const [trackingCode, setTrackingCode] = useState('')
     const [trackingDialogOpen, setTrackingDialogOpen] = useState(false)
+    const [copied, setCopied] = useState(false)
+    const [showToast, setShowToast] = useState(false)
 
     const updateStatus = async (newStatus: string, additionalData?: object) => {
         setLoading(true)
@@ -58,6 +60,22 @@ export function OrderActions({ orderId, currentStatus, slipImage }: OrderActions
             alert('เกิดข้อผิดพลาด กรุณาลองใหม่')
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleCopyUrl = async () => {
+        const url = `${window.location.origin}/orders/${orderId}`
+        try {
+            await navigator.clipboard.writeText(url)
+            setCopied(true)
+            setShowToast(true)
+
+            setTimeout(() => {
+                setCopied(false)
+                setShowToast(false)
+            }, 2000)
+        } catch (error) {
+            console.error('Failed to copy:', error)
         }
     }
 
@@ -203,14 +221,19 @@ export function OrderActions({ orderId, currentStatus, slipImage }: OrderActions
             <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => {
-                    const url = `${window.location.origin}/orders/${orderId}`
-                    navigator.clipboard.writeText(url)
-                    alert('คัดลอก URL สำหรับลูกค้าแล้ว!')
-                }}
+                onClick={handleCopyUrl}
             >
-                <Share2 className="mr-2 h-4 w-4" />
-                คัดลอก URL สำหรับลูกค้า
+                {copied ? (
+                    <>
+                        <Check className="mr-2 h-4 w-4 text-green-500" />
+                        คัดลอกแล้ว
+                    </>
+                ) : (
+                    <>
+                        <Share2 className="mr-2 h-4 w-4" />
+                        คัดลอก URL สำหรับลูกค้า
+                    </>
+                )}
             </Button>
 
             {/* Print Receipt - Always available */}
@@ -222,6 +245,15 @@ export function OrderActions({ orderId, currentStatus, slipImage }: OrderActions
                 <Printer className="mr-2 h-4 w-4" />
                 พิมพ์ใบเสร็จ
             </Button>
+
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="fixed bottom-4 right-4 bg-foreground text-background px-4 py-2 rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-bottom-2 duration-300 flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    คัดลอก URL สำหรับลูกค้าแล้ว
+                </div>
+            )}
         </div>
     )
 }
+
