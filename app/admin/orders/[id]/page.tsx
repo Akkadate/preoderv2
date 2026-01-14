@@ -8,13 +8,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { OrderActions } from './OrderActions'
 import { ImageDialog } from '@/components/image-dialog'
-import dynamic from 'next/dynamic'
-
-// Dynamic import for LocationView (Leaflet requires window)
-const LocationView = dynamic(
-    () => import('@/components/LocationView').then(mod => ({ default: mod.LocationView })),
-    { ssr: false, loading: () => <div className="h-[150px] bg-muted rounded-lg animate-pulse" /> }
-)
+import { LocationViewWrapper } from '@/components/LocationViewWrapper'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -311,7 +305,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                                 <MapPin className="h-4 w-4" />
                                                 ตำแหน่งบนแผนที่
                                             </p>
-                                            <LocationView
+                                            <LocationViewWrapper
                                                 location={shippingAddress.location}
                                                 size={150}
                                             />
