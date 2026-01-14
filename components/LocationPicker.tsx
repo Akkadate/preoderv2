@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import { Button } from '@/components/ui/button'
 import { MapPin, Loader2, Navigation } from 'lucide-react'
 import L from 'leaflet'
@@ -32,6 +32,21 @@ function MapClickHandler({ onLocationSelect }: { onLocationSelect: (lat: number,
             onLocationSelect(e.latlng.lat, e.latlng.lng)
         },
     })
+    return null
+}
+
+// Component to pan/zoom map when location changes
+function MapController({ location }: { location: { lat: number; lng: number } | null }) {
+    const map = useMap()
+
+    useEffect(() => {
+        if (location) {
+            map.flyTo([location.lat, location.lng], 15, {
+                duration: 1
+            })
+        }
+    }, [location, map])
+
     return null
 }
 
@@ -131,6 +146,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     <MapClickHandler onLocationSelect={handleLocationSelect} />
+                    <MapController location={value} />
                     {value && (
                         <DraggableMarker
                             position={[value.lat, value.lng]}
