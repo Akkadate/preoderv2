@@ -13,7 +13,7 @@ interface TelegramMessage {
 interface TelegramResponse {
     ok: boolean
     description?: string
-    result?: any
+    result?: unknown
 }
 
 /**
