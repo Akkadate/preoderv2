@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Store, Building2 } from 'lucide-react'
 import {
@@ -25,23 +25,28 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
     const router = useRouter()
     const pathname = usePathname()
     const { selectedShopId, setSelectedShopId, setShops } = useShopStore()
+    const [mounted, setMounted] = useState(false)
 
     // Initialize shops in store
     useEffect(() => {
         setShops(shops)
     }, [shops, setShops])
 
-    // Sync with cookie on mount
+    // Sync with cookie on mount (only once)
     useEffect(() => {
         const cookieShopId = document.cookie
             .split('; ')
             .find(row => row.startsWith('selectedShopId='))
             ?.split('=')[1]
 
-        if (cookieShopId && cookieShopId !== selectedShopId) {
-            setSelectedShopId(cookieShopId === 'all' ? null : cookieShopId)
+        if (cookieShopId) {
+            const newId = cookieShopId === 'all' ? null : cookieShopId
+            setSelectedShopId(newId)
         }
-    }, [selectedShopId, setSelectedShopId])
+
+        // Mark as mounted after initial sync
+        setMounted(true)
+    }, []) // Remove dependencies to run only once
 
     const handleChange = (value: string) => {
         const newShopId = value === 'all' ? null : value
@@ -56,6 +61,11 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
 
     const selectedShop = shops.find(s => s.id === selectedShopId)
 
+    // Show placeholder while hydrating to prevent flicker
+    const displayValue = mounted
+        ? (selectedShopId === null ? 'ทุกร้าน' : selectedShop?.name || 'เลือกร้าน')
+        : 'กำลังโหลด...'
+
     return (
         <div className="px-4 py-3 border-b">
             <label className="text-xs text-muted-foreground mb-1 block">
@@ -69,7 +79,7 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
                     <div className="flex items-center gap-2">
                         <Store className="h-4 w-4" />
                         <SelectValue>
-                            {selectedShopId === null ? 'ทุกร้าน' : selectedShop?.name || 'เลือกร้าน'}
+                            {displayValue}
                         </SelectValue>
                     </div>
                 </SelectTrigger>
