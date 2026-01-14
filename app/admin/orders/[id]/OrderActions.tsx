@@ -236,6 +236,16 @@ export function OrderActions({ orderId, currentStatus, slipImage }: OrderActions
                 )}
             </Button>
 
+            {/* Print Shipping Label - Always available */}
+            <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => window.open(`/print/order/${orderId}`, '_blank')}
+            >
+                <Printer className="mr-2 h-4 w-4" />
+                พิมพ์ใบปะหน้าพัสดุ
+            </Button>
+
             {/* Print Receipt - Always available */}
             <Button
                 variant="outline"

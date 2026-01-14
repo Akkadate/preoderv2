@@ -45,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const { id } = await params
         const body = await request.json()
 
-        const { name, description, price, images, isAvailable, limitPerRound, optionsConfig } = body
+        const { name, description, price, costPrice, images, shopId, isAvailable, limitPerRound, optionsConfig } = body
 
         const product = await prisma.product.update({
             where: { id },
@@ -53,7 +53,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
                 name,
                 description: description || null,
                 price: price ? parseFloat(price) : undefined,
+                costPrice: costPrice !== undefined ? (costPrice ? parseFloat(costPrice) : null) : undefined,
                 images: images || undefined,
+                shopId: shopId || undefined,
                 isAvailable: isAvailable,
                 limitPerRound: limitPerRound !== undefined ? (limitPerRound ? parseInt(limitPerRound) : null) : undefined,
                 optionsConfig: optionsConfig !== undefined ? optionsConfig : undefined,

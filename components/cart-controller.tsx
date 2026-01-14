@@ -8,10 +8,11 @@ export function CartController() {
     // Don't show cart on admin pages
     const isAdmin = pathname?.startsWith('/admin')
 
-    // Don't show cart on receipt pages either
+    // Don't show cart on receipt or print pages either
     const isReceipt = pathname?.startsWith('/receipt')
+    const isPrint = pathname?.startsWith('/print')
 
-    if (isAdmin || isReceipt) return null
+    if (isAdmin || isReceipt || isPrint) return null
 
     return <CartDrawer />
 }

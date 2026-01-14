@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 async function getUserShops(email: string) {
     return await prisma.shop.findMany({
         where: { owner: { email } },
-        select: { id: true, name: true },
+        select: { id: true, name: true, slug: true },
         orderBy: { name: 'asc' }
     })
 }

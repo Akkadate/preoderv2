@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
 
-        const { name, description, price, images, shopId, isAvailable, limitPerRound, optionsConfig } = body
+        const { name, description, price, costPrice, images, shopId, isAvailable, limitPerRound, optionsConfig } = body
 
         if (!name || !price || !shopId) {
             return NextResponse.json(
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
                 name,
                 description: description || null,
                 price: parseFloat(price),
+                costPrice: costPrice ? parseFloat(costPrice) : null,
                 images: images || [],
                 shopId,
                 isAvailable: isAvailable ?? true,

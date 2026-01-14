@@ -49,12 +49,35 @@ prisma/
 
 ---
 
-## 🌐 Environment Configuration
+## 🌐 Environment Configuration (SaaS-Ready)
 
-| Environment | Database URL | ไฟล์ Config |
-|-------------|--------------|-------------|
-| **Local** | `localhost:5432/merchant_saas` | `.env` |
-| **Railway** | `postgres.railway.internal:5432` | Inject อัตโนมัติ |
+### ไฟล์ Environment
+
+| ไฟล์ | ใช้ทำอะไร | Commit ไหม |
+|------|----------|-----------|
+| `.env` | Template + shared config (ไม่มี secrets) | ✅ Yes |
+| `.env.local` | **Local development** (DATABASE_URL local) | ❌ No |
+| `.env.production` | Production secrets (ถ้าจำเป็น) | ❌ No |
+
+### 🔒 กฎเหล็ก: DATABASE_URL
+
+```bash
+# ✅ .env.local - ใช้ local database เท่านั้น
+DATABASE_URL="postgresql://postgres:password@localhost:5432/merchant_saas"
+
+# ❌ อย่าเก็บ production URL ใน file ใดๆ
+# Railway จะ inject DATABASE_URL เองตอน runtime
+```
+
+### ⚠️ ก่อนรัน Prisma command ใดๆ - ตรวจสอบก่อน!
+
+```powershell
+# ตรวจสอบว่าชี้ไป local
+echo $env:DATABASE_URL
+
+# ถ้าเห็น "railway" หรือ "proxy.rlwy.net" = อันตราย!
+# ให้ปิด terminal แล้วเปิดใหม่
+```
 
 ---
 

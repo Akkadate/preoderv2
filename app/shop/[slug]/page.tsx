@@ -69,6 +69,7 @@ async function getProducts(shopId: string, roundId?: string) {
             ...product,
             // Convert Decimal to number for client component serialization
             price: Number(product.price),
+            costPrice: product.costPrice ? Number(product.costPrice) : null,
             // Convert dates to ISO strings
             createdAt: product.createdAt.toISOString(),
             soldCount,

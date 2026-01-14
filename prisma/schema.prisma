@@ -112,7 +112,8 @@ model Product {
   id            String    @id @default(cuid())
   name          String
   description   String?
-  price         Decimal   @db.Decimal(10, 2) // ใช้ Decimal เสมอสำหรับเรื่องเงิน
+  price         Decimal   @db.Decimal(10, 2) // ราคาขาย
+  costPrice     Decimal?  @db.Decimal(10, 2) // ต้นทุน (optional สำหรับคำนวณกำไร)
   images        String[]  // เก็บรูปภาพหลายรูป
   
   shopId        String

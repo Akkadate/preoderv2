@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,7 @@ interface ProductFormProps {
         name: string
         description?: string | null
         price: number
+        costPrice?: number | null
         images: string[]
         shopId: string
         isAvailable: boolean
@@ -40,11 +41,22 @@ export function ProductForm({ initialData, shops, onSubmit, title }: ProductForm
         name: initialData?.name || '',
         description: initialData?.description || '',
         price: initialData?.price || '',
+        costPrice: initialData?.costPrice || '',
         images: initialData?.images || [],
         shopId: initialData?.shopId || (shops.length > 0 ? shops[0].id : ''),
         isAvailable: initialData?.isAvailable ?? true,
         limitPerRound: initialData?.limitPerRound || '',
     })
+
+    // Sync formData when initialData changes (important for shop pre-selection)
+    useEffect(() => {
+        if (initialData?.shopId && initialData.shopId !== formData.shopId) {
+            setFormData(prev => ({
+                ...prev,
+                shopId: initialData.shopId
+            }))
+        }
+    }, [initialData?.shopId])
 
     const [imageUrlInput, setImageUrlInput] = useState('')
 
@@ -113,6 +125,7 @@ export function ProductForm({ initialData, shops, onSubmit, title }: ProductForm
             await onSubmit({
                 ...formData,
                 price: parseFloat(formData.price.toString()),
+                costPrice: formData.costPrice ? parseFloat(formData.costPrice.toString()) : null,
                 limitPerRound: formData.limitPerRound ? parseInt(formData.limitPerRound.toString()) : null
             })
             router.refresh()
@@ -170,7 +183,7 @@ export function ProductForm({ initialData, shops, onSubmit, title }: ProductForm
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="price">ราคา (บาท) <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="price">ราคาขาย (บาท) <span className="text-red-500">*</span></Label>
                         <Input
                             id="price"
                             name="price"
@@ -180,6 +193,21 @@ export function ProductForm({ initialData, shops, onSubmit, title }: ProductForm
                             value={formData.price}
                             onChange={handleChange}
                             required
+                        />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="costPrice">ต้นทุน (บาท)</Label>
+                        <p className="text-sm text-muted-foreground">สำหรับคำนวณกำไร (ไม่บังคับ)</p>
+                        <Input
+                            id="costPrice"
+                            name="costPrice"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="เช่น 50"
+                            value={formData.costPrice}
+                            onChange={handleChange}
                         />
                     </div>
 

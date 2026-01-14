@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Home, Package, ShoppingBag, Users, Settings, LayoutDashboard, ExternalLink } from 'lucide-react'
+import { Home, Package, ShoppingBag, Users, Settings, LayoutDashboard, ExternalLink, Wallet } from 'lucide-react'
 import { LogoutButton } from '@/app/admin/LogoutButton'
 import { cn } from '@/lib/utils'
 import { ShopSwitcher } from '@/components/shop-switcher'
@@ -67,6 +67,13 @@ export function AdminSidebar({ className, user, shops = [], onNavigate }: AdminS
                     <Button variant="ghost" className="w-full justify-start">
                         <ShoppingBag className="mr-2 h-4 w-4" />
                         คำสั่งซื้อ
+                    </Button>
+                </Link>
+
+                <Link href="/admin/finance" onClick={onNavigate}>
+                    <Button variant="ghost" className="w-full justify-start">
+                        <Wallet className="mr-2 h-4 w-4" />
+                        การเงิน
                     </Button>
                 </Link>
 
