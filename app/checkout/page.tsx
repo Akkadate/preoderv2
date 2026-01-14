@@ -10,6 +10,13 @@ import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, ShoppingBag, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { PromptPayQR } from '@/components/PromptPayQR'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for LocationPicker (Leaflet requires window)
+const LocationPicker = dynamic(
+    () => import('@/components/LocationPicker').then(mod => ({ default: mod.LocationPicker })),
+    { ssr: false, loading: () => <div className="h-48 bg-muted rounded-lg animate-pulse" /> }
+)
 
 interface CustomerInfo {
     name: string
@@ -17,6 +24,7 @@ interface CustomerInfo {
     address: string
     lineId: string
     note: string
+    location: { lat: number; lng: number } | null
 }
 
 interface ShopSettings {
@@ -45,6 +53,7 @@ export default function CheckoutPage() {
         address: '',
         lineId: '',
         note: '',
+        location: null,
     })
 
     // Fetch shop settings on mount
@@ -210,6 +219,17 @@ export default function CheckoutPage() {
                                             value={customerInfo.address}
                                             onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })}
                                             placeholder="กรอกที่อยู่สำหรับจัดส่ง"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-medium">ตำแหน่งบนแผนที่</label>
+                                        <p className="text-xs text-muted-foreground mb-2">
+                                            กดปุ่มใช้ตำแหน่งปัจจุบัน หรือคลิกบนแผนที่เพื่อปักหมุด
+                                        </p>
+                                        <LocationPicker
+                                            value={customerInfo.location}
+                                            onChange={(location) => setCustomerInfo({ ...customerInfo, location })}
                                         />
                                     </div>
 

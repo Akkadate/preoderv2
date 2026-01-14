@@ -18,6 +18,7 @@ interface CheckoutRequest {
         address: string
         lineId?: string
         note?: string
+        location?: { lat: number; lng: number } | null
     }
     shopId: string
     roundId: string
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
                     address: customerInfo.address,
                     lineId: customerInfo.lineId,
                     note: customerInfo.note,
+                    location: customerInfo.location || null,
                 },
                 shopId,
                 roundId,
