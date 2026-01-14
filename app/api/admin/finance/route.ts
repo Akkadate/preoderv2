@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
             for (const item of order.items) {
                 totalItems += item.quantity
-                const revenue = Number(item.subtotal)
+                const revenue = Number(item.totalPrice)
                 const costPrice = item.product?.costPrice ? Number(item.product.costPrice) : 0
                 const itemCost = costPrice * item.quantity
                 totalCost += itemCost
