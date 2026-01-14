@@ -2,14 +2,16 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Home, Package, ShoppingBag, Users, Settings, LayoutDashboard } from 'lucide-react'
+import { Home, Package, ShoppingBag, Users, Settings, LayoutDashboard, ExternalLink } from 'lucide-react'
 import { LogoutButton } from '@/app/admin/LogoutButton'
 import { cn } from '@/lib/utils'
 import { ShopSwitcher } from '@/components/shop-switcher'
+import { useShopStore } from '@/lib/shop-store'
 
 interface Shop {
     id: string
     name: string
+    slug?: string
 }
 
 interface AdminSidebarProps {
@@ -23,6 +25,12 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({ className, user, shops = [], onNavigate }: AdminSidebarProps) {
+    const { selectedShopId } = useShopStore()
+
+    // Find selected shop to get its slug
+    const selectedShop = shops.find(s => s.id === selectedShopId)
+    const shopUrl = selectedShop?.slug ? `/shop/${selectedShop.slug}` : '/'
+
     return (
         <div className={cn("flex flex-col h-full bg-card border-r", className)}>
             <div className="p-6">
@@ -87,12 +95,14 @@ export function AdminSidebar({ className, user, shops = [], onNavigate }: AdminS
             </nav>
 
             <div className="p-4 mt-auto space-y-2 border-t">
-                <Link href="/" onClick={onNavigate}>
-                    <Button variant="outline" size="sm" className="w-full">
-                        <Home className="mr-2 h-4 w-4" />
-                        ดูหน้าร้าน
-                    </Button>
-                </Link>
+                {selectedShop && (
+                    <Link href={`/shop/${selectedShop.slug}`} target="_blank" onClick={onNavigate}>
+                        <Button variant="outline" size="sm" className="w-full">
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            ดูหน้าร้าน
+                        </Button>
+                    </Link>
+                )}
                 <div onClick={onNavigate}>
                     {/* Pass className to LogoutButton if needed, or wrap it */}
                     <LogoutButton />
@@ -101,3 +111,4 @@ export function AdminSidebar({ className, user, shops = [], onNavigate }: AdminS
         </div>
     )
 }
+
