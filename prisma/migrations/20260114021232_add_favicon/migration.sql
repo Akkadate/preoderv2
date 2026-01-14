@@ -5,7 +5,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "Shop" DROP COLUMN "lineNotifyToken",
+ALTER TABLE "Shop" 
 ADD COLUMN     "favicon" TEXT,
 ADD COLUMN     "telegramBotToken" TEXT,
 ADD COLUMN     "telegramChatId" TEXT;
