@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getSelectedShopIds } from '@/lib/auth-utils'
+import { CopyOrderUrlButton } from '@/components/CopyOrderUrlButton'
 
 async function getOrders() {
     const shopIds = await getSelectedShopIds()
@@ -96,6 +97,7 @@ export default async function OrdersPage() {
                                 <Link href={`/admin/orders/${order.id}`}>
                                     <Button variant="outline" size="sm">ดูรายละเอียด</Button>
                                 </Link>
+                                <CopyOrderUrlButton orderId={order.id} />
                                 {order.status === 'PENDING' && (
                                     <Button variant="default" size="sm">ยืนยันการชำระเงิน</Button>
                                 )}
