@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 import { Store, Building2 } from 'lucide-react'
 import {
     Select,
@@ -22,10 +21,7 @@ interface ShopSwitcherProps {
 }
 
 export function ShopSwitcher({ shops }: ShopSwitcherProps) {
-    const router = useRouter()
-    const pathname = usePathname()
     const { selectedShopId, setSelectedShopId, setShops } = useShopStore()
-    const [mounted, setMounted] = useState(false)
 
     // Initialize shops in store
     useEffect(() => {
@@ -43,10 +39,7 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
             const newId = cookieShopId === 'all' ? null : cookieShopId
             setSelectedShopId(newId)
         }
-
-        // Mark as mounted after initial sync
-        setMounted(true)
-    }, []) // Remove dependencies to run only once
+    }, [setSelectedShopId])
 
     const handleChange = (value: string) => {
         const newShopId = value === 'all' ? null : value
@@ -61,13 +54,8 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
 
     const selectedShop = shops.find(s => s.id === selectedShopId)
 
-    // Show placeholder while hydrating to prevent flicker
-    const displayValue = mounted
-        ? (selectedShopId === null ? 'ทุกร้าน' : selectedShop?.name || 'เลือกร้าน')
-        : 'กำลังโหลด...'
-
     return (
-        <div className="px-4 py-3 border-b">
+        <div className="px-4 py-3 border-b" suppressHydrationWarning>
             <label className="text-xs text-muted-foreground mb-1 block">
                 ร้านปัจจุบัน
             </label>
@@ -79,7 +67,7 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
                     <div className="flex items-center gap-2">
                         <Store className="h-4 w-4" />
                         <SelectValue>
-                            {displayValue}
+                            {selectedShopId === null ? 'ทุกร้าน' : selectedShop?.name || 'เลือกร้าน'}
                         </SelectValue>
                     </div>
                 </SelectTrigger>
@@ -103,4 +91,3 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
         </div>
     )
 }
-
