@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getSelectedShopIds } from '@/lib/auth-utils'
 
-// GET all rounds for admin
+// GET all rounds for admin (filtered by user's shops)
 export async function GET() {
     try {
+        const shopIds = await getSelectedShopIds()
+        if (!shopIds) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
         const rounds = await prisma.round.findMany({
+            where: {
+                shopId: { in: shopIds }
+            },
             orderBy: { createdAt: 'desc' },
             include: {
                 shop: {

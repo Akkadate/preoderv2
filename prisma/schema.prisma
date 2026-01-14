@@ -57,6 +57,7 @@ model Shop {
   slug          String    @unique // เช่น app.com/shop/jeth-kitchen
   description   String?
   logo          String?
+  favicon       String?   // Added favicon field
   type          ShopType  @default(BUYING_AGENT)
   isActive      Boolean   @default(true)
   

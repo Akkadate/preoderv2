@@ -3,8 +3,9 @@ import { prisma } from '@/lib/prisma'
 import ShopHeader from './components/ShopHeader'
 import ProductGrid from './components/ProductGrid'
 import RoundSelector from './components/RoundSelector'
+import { Metadata } from 'next'
 
-interface PageProps {
+export interface PageProps {
     params: Promise<{ slug: string }>
     searchParams: Promise<{ roundId?: string }>
 }
@@ -75,6 +76,29 @@ async function getProducts(shopId: string, roundId?: string) {
             isInStock: product.limitPerRound ? remaining! > 0 : true,
         }
     })
+}
+
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const resolvedParams = await params
+    const shop = await prisma.shop.findUnique({
+        where: { slug: resolvedParams.slug },
+        select: { name: true, description: true, favicon: true }
+    })
+
+    if (!shop) {
+        return {
+            title: 'ไม่พบร้านค้า'
+        }
+    }
+
+    return {
+        title: shop.name,
+        description: shop.description || `สินค้าพรีออเดอร์จากร้าน ${shop.name}`,
+        icons: shop.favicon ? {
+            icon: `${shop.favicon}?v=${new Date().getTime()}`
+        } : undefined,
+    }
 }
 
 export default async function ShopPage({ params, searchParams }: PageProps) {

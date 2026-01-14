@@ -30,6 +30,7 @@ interface ShopSettings {
     slug: string
     description: string | null
     logo: string | null
+    favicon: string | null
     bankInfo: BankInfo | null
     shippingRates: ShippingRates | null
 }
@@ -111,6 +112,7 @@ export default function SettingsPage() {
                 body: JSON.stringify({
                     name: shop?.name,
                     logo: shop?.logo,
+                    favicon: shop?.favicon,
                     description: shop?.description,
                     bankInfo,
                     shippingRates,
@@ -211,13 +213,24 @@ export default function SettingsPage() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex flex-col sm:flex-row gap-8">
-                            <div className="grid gap-2">
-                                <Label>โลโก้ร้าน</Label>
-                                <ImageUpload
-                                    value={shop?.logo}
-                                    onChange={(url) => setShop(prev => prev ? { ...prev, logo: url } : null)}
-                                    onRemove={() => setShop(prev => prev ? { ...prev, logo: null } : null)}
-                                />
+                            <div className="grid gap-6">
+                                <div className="grid gap-2">
+                                    <Label>โลโก้ร้าน</Label>
+                                    <ImageUpload
+                                        value={shop?.logo}
+                                        onChange={(url) => setShop(prev => prev ? { ...prev, logo: url } : null)}
+                                        onRemove={() => setShop(prev => prev ? { ...prev, logo: null } : null)}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Favicon (ไอคอนเว็บ)</Label>
+                                    <ImageUpload
+                                        value={shop?.favicon}
+                                        onChange={(url) => setShop(prev => prev ? { ...prev, favicon: url } : null)}
+                                        onRemove={() => setShop(prev => prev ? { ...prev, favicon: null } : null)}
+                                    />
+                                    <p className="text-xs text-muted-foreground">แสดงบน Browser Tab</p>
+                                </div>
                             </div>
                             <div className="flex-1 space-y-4">
                                 <div className="grid gap-2">

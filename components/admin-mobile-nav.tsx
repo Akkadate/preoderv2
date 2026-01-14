@@ -6,14 +6,20 @@ import { AdminSidebar } from '@/components/admin-sidebar'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 
+interface Shop {
+    id: string
+    name: string
+}
+
 interface AdminMobileNavProps {
     user?: {
         name?: string | null
         email?: string | null
     }
+    shops?: Shop[]
 }
 
-export function AdminMobileNav({ user }: AdminMobileNavProps) {
+export function AdminMobileNav({ user, shops = [] }: AdminMobileNavProps) {
     const [open, setOpen] = useState(false)
 
     return (
@@ -28,6 +34,7 @@ export function AdminMobileNav({ user }: AdminMobileNavProps) {
                     <SheetTitle className="sr-only">Admin Menu</SheetTitle>
                     <AdminSidebar
                         user={user}
+                        shops={shops}
                         className="border-none"
                         onNavigate={() => setOpen(false)}
                     />

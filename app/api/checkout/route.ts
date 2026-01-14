@@ -111,6 +111,7 @@ export async function POST(request: NextRequest) {
         const shop = await prisma.shop.findUnique({
             where: { id: shopId },
             select: {
+                name: true,
                 telegramBotToken: true,
                 telegramChatId: true,
             }
@@ -120,6 +121,7 @@ export async function POST(request: NextRequest) {
             notifyNewOrder(
                 shop.telegramBotToken,
                 shop.telegramChatId,
+                shop.name,
                 {
                     code: order.code,
                     customerName: customerInfo.name,

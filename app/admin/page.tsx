@@ -3,14 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Package, ShoppingBag, Users, DollarSign } from 'lucide-react'
 import Link from 'next/link'
+import { getSelectedShopIds } from '@/lib/auth-utils'
 
 async function getStats() {
+    const shopIds = await getSelectedShopIds()
+    if (!shopIds || shopIds.length === 0) {
+        return { orders: 0, products: 0, customers: 0, rounds: [], revenue: 0 }
+    }
+
     const [orders, products, customers, rounds] = await Promise.all([
-        prisma.order.count(),
-        prisma.product.count(),
-        prisma.customer.count(),
+        prisma.order.count({ where: { round: { shopId: { in: shopIds } } } }),
+        prisma.product.count({ where: { shopId: { in: shopIds } } }),
+        prisma.customer.count({ where: { shopId: { in: shopIds } } }),
         prisma.round.findMany({
-            where: { status: 'OPEN' },
+            where: { status: 'OPEN', shopId: { in: shopIds } },
             include: {
                 shop: { select: { name: true, slug: true } },
                 _count: { select: { orders: true } },
@@ -20,7 +26,10 @@ async function getStats() {
 
     const totalRevenue = await prisma.order.aggregate({
         _sum: { grandTotal: true },
-        where: { status: { in: ['PAID_WAITING', 'CONFIRMED', 'SHIPPED', 'COMPLETED'] } },
+        where: {
+            round: { shopId: { in: shopIds } },
+            status: { in: ['PAID_WAITING', 'CONFIRMED', 'SHIPPED', 'COMPLETED'] }
+        },
     })
 
     return {

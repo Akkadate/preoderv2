@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { cookies } from 'next/headers'
 
 // GET shop settings
 export async function GET() {
@@ -10,19 +11,30 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Get the first shop owned by the current user
+        // Read selected shop from cookie
+        const cookieStore = await cookies()
+        const selectedShopId = cookieStore.get('selectedShopId')?.value
+
+        // Build where clause
+        const whereClause: any = {
+            owner: { email: session.user.email }
+        }
+
+        // If a specific shop is selected (not "all"), get that one
+        if (selectedShopId && selectedShopId !== 'all') {
+            whereClause.id = selectedShopId
+        }
+
+        // Get the shop
         const shop = await prisma.shop.findFirst({
-            where: {
-                owner: {
-                    email: session.user.email
-                }
-            },
+            where: whereClause,
             select: {
                 id: true,
                 name: true,
                 slug: true,
                 description: true,
                 logo: true,
+                favicon: true,
                 bankInfo: true,
                 shippingRates: true,
                 telegramBotToken: true,
@@ -53,15 +65,24 @@ export async function PUT(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { bankInfo, shippingRates, name, description, logo, telegramBotToken, telegramChatId } = body
+        const { bankInfo, shippingRates, name, description, logo, favicon, telegramBotToken, telegramChatId } = body
+
+        // Read selected shop from cookie
+        const cookieStore = await cookies()
+        const selectedShopId = cookieStore.get('selectedShopId')?.value
+
+        // Build where clause
+        const whereClause: any = {
+            owner: { email: session.user.email }
+        }
+
+        if (selectedShopId && selectedShopId !== 'all') {
+            whereClause.id = selectedShopId
+        }
 
         // Get the shop owned by the current user
         const existingShop = await prisma.shop.findFirst({
-            where: {
-                owner: {
-                    email: session.user.email
-                }
-            }
+            where: whereClause
         })
 
         if (!existingShop) {
@@ -74,6 +95,7 @@ export async function PUT(request: NextRequest) {
                 name: name !== undefined ? name : undefined,
                 description: description !== undefined ? description : undefined,
                 logo: logo !== undefined ? logo : undefined,
+                favicon: favicon !== undefined ? favicon : undefined,
                 bankInfo: bankInfo !== undefined ? bankInfo : undefined,
                 shippingRates: shippingRates !== undefined ? shippingRates : undefined,
                 telegramBotToken: telegramBotToken !== undefined ? telegramBotToken : undefined,
@@ -85,6 +107,7 @@ export async function PUT(request: NextRequest) {
                 slug: true,
                 description: true,
                 logo: true,
+                // favicon: true, // Temporarily disabled until server restart
                 bankInfo: true,
                 shippingRates: true,
                 telegramBotToken: true,

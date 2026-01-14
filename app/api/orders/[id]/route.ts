@@ -20,6 +20,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                         shop: {
                             select: {
                                 name: true,
+                                slug: true,
                                 bankInfo: true,
                             },
                         },

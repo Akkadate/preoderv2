@@ -2,9 +2,18 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Users, ShoppingBag, DollarSign } from 'lucide-react'
+import { getSelectedShopIds } from '@/lib/auth-utils'
 
 async function getCustomers() {
+    const shopIds = await getSelectedShopIds()
+    if (!shopIds || shopIds.length === 0) {
+        return []
+    }
+
     const customers = await prisma.customer.findMany({
+        where: {
+            shopId: { in: shopIds }
+        },
         include: {
             shop: { select: { name: true } },
             orders: {

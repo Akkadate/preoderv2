@@ -57,6 +57,7 @@ export async function sendTelegramMessage({
 export async function notifyNewOrder(
     botToken: string,
     chatId: string,
+    shopName: string,
     order: {
         code: string
         customerName: string
@@ -72,6 +73,7 @@ export async function notifyNewOrder(
         .join('\n')
 
     const message = `
+🏢 <b>ร้าน: ${shopName}</b>
 🛒 <b>ออเดอร์ใหม่!</b>
 
 📋 <b>รหัส:</b> ${order.code}

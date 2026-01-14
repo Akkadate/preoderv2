@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
 import { notFound } from 'next/navigation'
 import { EditRoundClient } from './EditRoundClient'
 
@@ -14,7 +15,13 @@ async function getRound(id: string) {
 }
 
 async function getShops() {
+    const session = await auth()
+    if (!session?.user?.email) {
+        return []
+    }
+
     return await prisma.shop.findMany({
+        where: { owner: { email: session.user.email } },
         select: { id: true, name: true }
     })
 }

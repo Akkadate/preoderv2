@@ -18,6 +18,7 @@ import {
     PartyPopper
 } from 'lucide-react'
 import Link from 'next/link'
+import { PromptPayQR } from '@/components/PromptPayQR'
 
 interface OrderData {
     id: string
@@ -41,10 +42,15 @@ interface OrderData {
         name: string
         shop: {
             name: string
+            slug: string
             bankInfo: {
                 bankName: string
-                accNo: string
-                accName: string
+                // Support both old and new field names
+                accNo?: string
+                accName?: string
+                accountNumber?: string
+                accountName?: string
+                promptPayNumber?: string
             } | null
         }
     }
@@ -64,13 +70,15 @@ export default function OrderTrackingPage() {
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
     const [slipPreview, setSlipPreview] = useState<string | null>(null)
+    const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false })
 
     useEffect(() => {
         async function fetchOrder() {
             try {
-                const res = await fetch(`/api/orders/${params.id}`)
+                const res = await fetch(`/api/orders/${params.id}`, { cache: 'no-store' })
                 if (res.ok) {
                     const data = await res.json()
+                    console.log('Order data:', data) // Debug log
                     setOrder(data)
                     if (data.slipImage) {
                         setSlipPreview(data.slipImage)
@@ -84,6 +92,11 @@ export default function OrderTrackingPage() {
         }
         fetchOrder()
     }, [params.id])
+
+    const showToast = (message: string) => {
+        setToast({ message, visible: true })
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000)
+    }
 
     const handleSlipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -109,11 +122,11 @@ export default function OrderTrackingPage() {
             if (res.ok) {
                 const updated = await res.json()
                 setOrder(updated)
-                alert('อัพโหลดสลิปสำเร็จ! รอร้านค้ายืนยัน')
+                showToast('อัพโหลดสลิปสำเร็จ! รอร้านค้ายืนยัน')
             }
         } catch (error) {
             console.error('Upload failed:', error)
-            alert('อัพโหลดไม่สำเร็จ กรุณาลองใหม่')
+            showToast('อัพโหลดไม่สำเร็จ กรุณาลองใหม่')
         } finally {
             setUploading(false)
         }
@@ -121,6 +134,7 @@ export default function OrderTrackingPage() {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text)
+        showToast('คัดลอกเรียบร้อยแล้ว')
     }
 
     if (loading) {
@@ -163,7 +177,7 @@ export default function OrderTrackingPage() {
                             onClick={() => {
                                 const url = window.location.href
                                 navigator.clipboard.writeText(url)
-                                alert('คัดลอก URL แล้ว!')
+                                showToast('คัดลอก URL แล้ว!')
                             }}
                         >
                             <Copy className="h-4 w-4 mr-1" />
@@ -223,30 +237,48 @@ export default function OrderTrackingPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-6 space-y-4">
+                            {/* QR Code */}
+                            {bankInfo.promptPayNumber && (
+                                <div className="flex flex-col items-center mb-4">
+                                    <PromptPayQR
+                                        mobileNumber={bankInfo.promptPayNumber}
+                                        amount={order.grandTotal}
+                                        size={180}
+                                    />
+                                    <p className="text-sm text-muted-foreground mt-2">สแกน QR Code เพื่อชำระเงิน</p>
+                                </div>
+                            )}
+
                             {/* Bank Info */}
                             <div className="bg-muted p-4 rounded-lg space-y-3">
                                 <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">ธนาคาร</span>
                                     <span className="font-medium">{bankInfo.bankName}</span>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground">เลขบัญชี</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-mono font-bold text-lg">{bankInfo.accNo}</span>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8"
-                                            onClick={() => copyToClipboard(bankInfo.accNo)}
-                                        >
-                                            <Copy className="h-4 w-4" />
-                                        </Button>
+                                {(bankInfo.accNo || bankInfo.accountNumber) && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">เลขบัญชี</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-mono font-bold text-lg">
+                                                {bankInfo.accNo || bankInfo.accountNumber}
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => copyToClipboard(bankInfo.accNo || bankInfo.accountNumber || '')}
+                                            >
+                                                <Copy className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground">ชื่อบัญชี</span>
-                                    <span className="font-medium">{bankInfo.accName}</span>
-                                </div>
+                                )}
+                                {(bankInfo.accName || bankInfo.accountName) && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">ชื่อบัญชี</span>
+                                        <span className="font-medium">{bankInfo.accName || bankInfo.accountName}</span>
+                                    </div>
+                                )}
                                 <Separator />
                                 <div className="flex justify-between items-center text-lg">
                                     <span className="font-medium">ยอดโอน</span>
@@ -379,10 +411,22 @@ export default function OrderTrackingPage() {
                     <p className="text-sm text-muted-foreground">
                         สร้างเมื่อ {new Date(order.createdAt).toLocaleString('th-TH')}
                     </p>
-                    <Link href="/">
-                        <Button variant="link">กลับหน้าร้านค้า</Button>
+                    <Link href={order.round.shop.slug ? `/shop/${order.round.shop.slug}` : '#'}>
+                        <Button variant="link" disabled={!order.round.shop.slug}>
+                            กลับหน้าร้านค้า
+                        </Button>
                     </Link>
                 </div>
+
+                {/* Toast Notification */}
+                {toast.visible && (
+                    <div className="fixed top-4 right-4 bg-foreground text-background px-4 py-2 rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            {toast.message}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

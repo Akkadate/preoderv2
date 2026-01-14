@@ -3,9 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { getSelectedShopIds } from '@/lib/auth-utils'
 
 async function getOrders() {
+    const shopIds = await getSelectedShopIds()
+    if (!shopIds || shopIds.length === 0) {
+        return []
+    }
+
     const orders = await prisma.order.findMany({
+        where: {
+            round: {
+                shopId: { in: shopIds }
+            }
+        },
         include: {
             customer: true,
             round: {

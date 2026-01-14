@@ -224,31 +224,7 @@ export default function CheckoutPage() {
                                 </CardContent>
                             </Card>
 
-                            {/* Payment Info - PromptPay QR */}
-                            {shopSettings?.bankInfo?.promptPayNumber && (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>ช่องทางชำระเงิน</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex justify-center">
-                                            <PromptPayQR
-                                                mobileNumber={shopSettings.bankInfo.promptPayNumber}
-                                                amount={grandTotal}
-                                                size={180}
-                                            />
-                                        </div>
 
-                                        {shopSettings.bankInfo.bankName && (
-                                            <div className="text-center text-sm space-y-1 pt-4 border-t">
-                                                <p><span className="text-muted-foreground">ธนาคาร:</span> {shopSettings.bankInfo.bankName}</p>
-                                                <p><span className="text-muted-foreground">เลขบัญชี:</span> {shopSettings.bankInfo.accountNumber}</p>
-                                                <p><span className="text-muted-foreground">ชื่อบัญชี:</span> {shopSettings.bankInfo.accountName}</p>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            )}
                         </div>
 
                         {/* Order Summary */}
