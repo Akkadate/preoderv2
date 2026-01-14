@@ -56,6 +56,27 @@ export default function CheckoutPage() {
         location: null,
     })
 
+    // Load saved customer info from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('savedCustomerInfo')
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved)
+                setCustomerInfo(prev => ({
+                    ...prev,
+                    name: parsed.name || '',
+                    phone: parsed.phone || '',
+                    address: parsed.address || '',
+                    lineId: parsed.lineId || '',
+                    location: parsed.location || null,
+                    // Note is intentionally not restored
+                }))
+            } catch (e) {
+                console.error('Failed to parse saved customer info', e)
+            }
+        }
+    }, [])
+
     // Fetch shop settings on mount
     useEffect(() => {
         async function fetchSettings() {
@@ -136,6 +157,16 @@ export default function CheckoutPage() {
             }
 
             const order = await response.json()
+
+            // Save customer info to localStorage for next time
+            localStorage.setItem('savedCustomerInfo', JSON.stringify({
+                name: customerInfo.name,
+                phone: customerInfo.phone,
+                address: customerInfo.address,
+                lineId: customerInfo.lineId,
+                location: customerInfo.location,
+            }))
+
             clearCart()
             router.push(`/checkout/success?orderId=${order.id}`)
         } catch (error) {
