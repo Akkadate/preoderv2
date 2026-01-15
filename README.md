@@ -94,3 +94,18 @@ https://console.cloudinary.com/app/c-46c5e79a1104fd684bf2a5a2a338d6/image/gettin
 Cloud name ds7ysdgvn
 api key    226152673865869
 api secret cYj7uw2RUxjjTVeC2GwhVAllrYM
+
+
+Telegram Bot Token: 8421839826:AAE3X3H1-8G-97jnyhnaLSnI31q4QR2JYNU
+Telegram Chat ID: 7764440784
+
+ Workflow ที่แนะนำ หลังปรับปรุง code
+1. แก้ไข schema.prisma ใน local
+2. รัน: npx prisma migrate dev --name add_feature_x
+3. ทดสอบใน local
+4. Commit ทั้ง schema.prisma และ folder migrations/
+5. Push to GitHub → Railway auto-deploys
+6. Railway รัน: npx prisma migrate deploy (อัตโนมัติ)
+
+
+--------------------------------------------16/1/2026-------------
