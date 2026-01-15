@@ -9,8 +9,9 @@ import { useCartStore } from '@/lib/cart-store'
 import { useState } from 'react'
 
 // Use serialized types for client components (Date becomes string, Decimal becomes number)
-interface ProductWithStock extends Omit<Product, 'createdAt' | 'price'> {
+interface ProductWithStock extends Omit<Product, 'createdAt' | 'price' | 'costPrice'> {
     price: number
+    costPrice: number | null
     createdAt: string
     soldCount: number
     remaining: number | null
