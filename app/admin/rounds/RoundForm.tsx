@@ -28,6 +28,7 @@ interface RoundFormProps {
     shops: Shop[]
     onSubmit: (data: any) => Promise<void>
     title: string
+    defaultShopId?: string
 }
 
 // Helper to format date for datetime-local input
@@ -40,13 +41,13 @@ function formatDateTimeLocal(date: string | Date | null | undefined): string {
     return localDate.toISOString().slice(0, 16)
 }
 
-export function RoundForm({ initialData, shops, onSubmit, title }: RoundFormProps) {
+export function RoundForm({ initialData, shops, onSubmit, title, defaultShopId }: RoundFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         name: initialData?.name || '',
-        shopId: initialData?.shopId || (shops.length > 0 ? shops[0].id : ''),
+        shopId: initialData?.shopId || defaultShopId || (shops.length > 0 ? shops[0].id : ''),
         opensAt: formatDateTimeLocal(initialData?.opensAt) || '',
         closesAt: formatDateTimeLocal(initialData?.closesAt) || '',
         shippingStart: formatDateTimeLocal(initialData?.shippingStart) || '',

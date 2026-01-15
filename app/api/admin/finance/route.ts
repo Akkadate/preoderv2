@@ -12,6 +12,8 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams
         const period = searchParams.get('period') || 'month' // day, week, month
 
+        const roundId = searchParams.get('roundId')
+
         // Calculate date range
         const now = new Date()
         let startDate: Date
@@ -30,13 +32,21 @@ export async function GET(request: NextRequest) {
                 break
         }
 
+        const where: any = {
+            round: { shopId: { in: shopIds } },
+            status: { in: ['CONFIRMED', 'SHIPPED', 'COMPLETED'] },
+            createdAt: { gte: startDate }
+        }
+
+        if (roundId && roundId !== 'all') {
+            where.roundId = roundId
+            // If specific round is selected, ignore date filter to show full round revenue
+            delete where.createdAt
+        }
+
         // Get completed orders
         const orders = await prisma.order.findMany({
-            where: {
-                round: { shopId: { in: shopIds } },
-                status: { in: ['CONFIRMED', 'SHIPPED', 'COMPLETED'] },
-                createdAt: { gte: startDate }
-            },
+            where,
             include: {
                 items: {
                     include: {

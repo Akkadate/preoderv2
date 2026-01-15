@@ -1,23 +1,39 @@
 import { prisma } from '@/lib/prisma'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getSelectedShopIds } from '@/lib/auth-utils'
 import { CopyOrderUrlButton } from '@/components/CopyOrderUrlButton'
+import { ExportButton } from '@/components/ExportButton'
+import { RoundFilter } from '@/components/RoundFilter'
+import { StatusFilter } from '@/components/StatusFilter'
+import { FileImage, Printer } from 'lucide-react'
 
-async function getOrders() {
-    const shopIds = await getSelectedShopIds()
-    if (!shopIds || shopIds.length === 0) {
-        return []
+interface OrdersPageProps {
+    searchParams: Promise<{
+        roundId?: string
+        status?: string
+    }>
+}
+
+async function getOrders(shopIds: string[], roundId?: string, status?: string) {
+    const where: any = {
+        round: {
+            shopId: { in: shopIds }
+        }
+    }
+
+    if (roundId && roundId !== 'all') {
+        where.roundId = roundId
+    }
+
+    if (status && status !== 'all') {
+        where.status = status
     }
 
     const orders = await prisma.order.findMany({
-        where: {
-            round: {
-                shopId: { in: shopIds }
-            }
-        },
+        where,
         include: {
             customer: true,
             round: {
@@ -33,6 +49,20 @@ async function getOrders() {
     })
 
     return orders
+}
+
+async function getRounds(shopIds: string[]) {
+    return prisma.round.findMany({
+        where: {
+            shopId: { in: shopIds }
+        },
+        include: {
+            shop: {
+                select: { name: true }
+            }
+        },
+        orderBy: { createdAt: 'desc' },
+    })
 }
 
 const statusLabels: Record<string, string> = {
@@ -53,14 +83,63 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
     CANCELLED: 'destructive',
 }
 
-export default async function OrdersPage() {
-    const orders = await getOrders()
+export default async function OrdersPage(props: OrdersPageProps) {
+    const searchParams = await props.searchParams
+    const shopIds = await getSelectedShopIds()
+
+    if (!shopIds || shopIds.length === 0) {
+        return <div className="p-8 text-center text-muted-foreground">ไม่พบร้านค้าที่คุณดูแล</div>
+    }
+
+    const rounds = await getRounds(shopIds)
+    const orders = await getOrders(shopIds, searchParams.roundId, searchParams.status)
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold">คำสั่งซื้อ</h1>
-                <p className="text-muted-foreground">จัดการคำสั่งซื้อทั้งหมด</p>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold">รายการคำสั่งซื้อ</h1>
+                    <p className="text-muted-foreground">จัดการคำสั่งซื้อทั้งหมด</p>
+                </div>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap justify-end">
+                    <div className="w-full sm:w-auto min-w-[150px] max-w-[200px]">
+                        <StatusFilter />
+                    </div>
+                    <div className="w-full sm:w-auto min-w-[200px] max-w-[300px]">
+                        <RoundFilter rounds={rounds} />
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                        {searchParams.roundId && searchParams.roundId !== 'all' && (
+                            <>
+                                <Link href={`/print/batch-labels/${searchParams.roundId}`} target="_blank">
+                                    <Button variant="outline">
+                                        <Printer className="mr-2 h-4 w-4" />
+                                        พิมพ์ใบปะหน้าทั้งรอบ
+                                    </Button>
+                                </Link>
+                                <Link href={`/admin/rounds/${searchParams.roundId}/purchase`}>
+                                    <Button variant="outline">
+                                        <FileImage className="mr-2 h-4 w-4" />
+                                        ดูใบสั่งของ
+                                    </Button>
+                                </Link>
+                                <ExportButton
+                                    endpoint="/api/admin/export/purchase"
+                                    filename={`purchase_list_${searchParams.roundId}.xlsx`}
+                                    label="Excel สั่งของ"
+                                    variant="outline"
+                                    extraParams={{ roundId: searchParams.roundId }}
+                                />
+                            </>
+                        )}
+                        <ExportButton
+                            endpoint="/api/admin/export/orders"
+                            filename={`orders_${searchParams.roundId || 'all'}.xlsx`}
+                            label="รายการคำสั่งซื้อ"
+                            extraParams={{ roundId: searchParams.roundId || '' }}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className="grid gap-4">
@@ -109,7 +188,7 @@ export default async function OrdersPage() {
                 {orders.length === 0 && (
                     <Card>
                         <CardContent className="py-8 text-center text-muted-foreground">
-                            ยังไม่มีคำสั่งซื้อ
+                            ไม่พบคำสั่งซื้อในรอบนี้
                         </CardContent>
                     </Card>
                 )}

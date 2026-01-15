@@ -2,7 +2,7 @@
 
 import { RoundForm } from '../RoundForm'
 
-export function NewRoundClient({ shops }: { shops: any[] }) {
+export function NewRoundClient({ shops, defaultShopId }: { shops: any[], defaultShopId?: string }) {
     const handleSubmit = async (data: any) => {
         const res = await fetch('/api/admin/rounds', {
             method: 'POST',
@@ -21,6 +21,7 @@ export function NewRoundClient({ shops }: { shops: any[] }) {
             shops={shops}
             onSubmit={handleSubmit}
             title="สร้างรอบขายใหม่"
+            defaultShopId={defaultShopId}
         />
     )
 }

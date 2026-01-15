@@ -14,7 +14,12 @@ async function getShops() {
     })
 }
 
+import { cookies } from 'next/headers'
+
 export default async function NewRoundPage() {
     const shops = await getShops()
-    return <NewRoundClient shops={shops} />
+    const cookieStore = await cookies()
+    const defaultShopId = cookieStore.get('selectedShopId')?.value
+
+    return <NewRoundClient shops={shops} defaultShopId={defaultShopId} />
 }
