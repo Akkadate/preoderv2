@@ -1,6 +1,16 @@
 # 📋 Workflow: Local Development → Railway Deploy
 
-## 🔄 ขั้นตอนการพัฒนาและ Deploy
+## 🔄 ขั้นตอนการพัฒนาและ Deploy (สรุป)
+
+| สถานการณ์ | สิ่งที่ต้องทำ | คำสั่ง Local | คำสั่ง Deploy |
+|-----------|--------------|--------------|---------------|
+| **แก้ Code ทั่วไป**<br>(HTML, CSS, Logic) | แก้ไข -> Test -> Git Push | `npm run dev` | `git add .`<br>`git commit -m "..."`<br>`git push` |
+| **แก้ Database**<br>(schema.prisma) | แก้ Schema -> Migrate Local -> Test -> Git Push | `npx prisma migrate dev`<br>`npm run dev` | `git add .`<br>`git commit -m "..."`<br>`git push` |
+| **P3009 Error**<br>(Deploy Failed) | ใช้ Public URL แก้สถานะ Migration | - | `prisma migrate resolve ...` |
+
+> **Note:** ในทั้ง 2 กรณี **คุณไม่ต้องรันคำสั่งเกี่ยวกับ Database บน Railway เอง** (เช่น `migrate deploy`) เพราะระบบจะรันให้อัตโนมัติเมื่อ code ขึ้นไปถึง ยกเว้นกรณีที่มัน Error เท่านั้น
+
+## 🔄 รายละเอียดขั้นตอน
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

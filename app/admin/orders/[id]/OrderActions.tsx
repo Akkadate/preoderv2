@@ -250,7 +250,7 @@ export function OrderActions({ orderId, currentStatus, slipImage }: OrderActions
             <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => window.open(`/receipt/${orderId}`, '_blank')}
+                onClick={() => window.open(`/print/receipt/${orderId}`, '_blank')}
             >
                 <Printer className="mr-2 h-4 w-4" />
                 พิมพ์ใบเสร็จ
