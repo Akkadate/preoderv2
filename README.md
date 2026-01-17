@@ -119,4 +119,4 @@ resend email
 
 NEXT_PUBLIC_APP_URL=https://preorder24.com
 
-17-1-2026
+17-1-2026 change domain
