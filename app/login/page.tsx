@@ -64,17 +64,18 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-            <Card className="w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-white to-blue-50 p-4">
+            <Card className="w-full max-w-md shadow-xl">
                 <CardHeader className="text-center">
-                    <div className="mx-auto w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-4">
-                        <Lock className="h-6 w-6 text-primary-foreground" />
+                    <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center mb-4 shadow-lg">
+                        <span className="text-white font-bold text-2xl">24</span>
                     </div>
-                    <CardTitle className="text-2xl">Admin Login</CardTitle>
+                    <CardTitle className="text-2xl">เข้าสู่ระบบ</CardTitle>
                     <CardDescription>
                         เข้าสู่ระบบเพื่อจัดการร้านค้า
                     </CardDescription>
                 </CardHeader>
+
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {error && (
