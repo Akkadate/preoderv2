@@ -118,3 +118,5 @@ resend email
 ต้องอัพเดท NEXT_PUBLIC_APP_URL ใน Railway:
 
 NEXT_PUBLIC_APP_URL=https://preorder24.com
+
+17-1-2026
