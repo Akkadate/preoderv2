@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Shield, AlertTriangle, FileText, Lock } from 'lucide-react'
+import { Shield, AlertTriangle, FileText, Lock, Loader2 } from 'lucide-react'
 
 const termsContent = `
 ข้อตกลงและเงื่อนไขการใช้บริการ PreOrder24
@@ -98,7 +98,7 @@ PreOrder24 อาจแก้ไขข้อตกลงนี้ได้ตล
 การกดปุ่ม "ยอมรับและดำเนินการต่อ" ถือว่าท่านได้อ่าน เข้าใจ และยินยอมปฏิบัติตามข้อตกลงทั้งหมดข้างต้น
 `
 
-export default function TermsPage() {
+function TermsContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [accepted, setAccepted] = useState(false)
@@ -252,5 +252,24 @@ export default function TermsPage() {
                 </Card>
             </div>
         </div>
+    )
+}
+
+function LoadingFallback() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-white to-blue-50">
+            <div className="text-center">
+                <Loader2 className="w-8 h-8 animate-spin text-violet-600 mx-auto mb-4" />
+                <p className="text-gray-600">กำลังโหลด...</p>
+            </div>
+        </div>
+    )
+}
+
+export default function TermsPage() {
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            <TermsContent />
+        </Suspense>
     )
 }
