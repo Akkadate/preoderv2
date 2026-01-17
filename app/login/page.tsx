@@ -67,9 +67,14 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-white to-blue-50 p-4">
             <Card className="w-full max-w-md shadow-xl">
                 <CardHeader className="text-center">
-                    <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center mb-4 shadow-lg">
-                        <span className="text-white font-bold text-2xl">24</span>
-                    </div>
+                    <a href="/" className="inline-flex items-center justify-center gap-2 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center shadow-lg">
+                            <span className="text-white font-bold text-xl">24</span>
+                        </div>
+                        <span className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+                            PreOrder24
+                        </span>
+                    </a>
                     <CardTitle className="text-2xl">เข้าสู่ระบบ</CardTitle>
                     <CardDescription>
                         เข้าสู่ระบบเพื่อจัดการร้านค้า
