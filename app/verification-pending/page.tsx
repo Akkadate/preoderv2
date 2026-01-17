@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import { Suspense, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Mail, RefreshCw } from 'lucide-react'
+import { Mail, RefreshCw, Loader2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
 
-export default function VerificationPendingPage() {
+function VerificationPendingContent() {
     const searchParams = useSearchParams()
     const email = searchParams.get('email') || 'your email'
     const [resending, setResending] = useState(false)
@@ -68,8 +68,8 @@ export default function VerificationPendingPage() {
 
                     {resendMessage && (
                         <div className={`text-sm p-3 rounded-lg ${resendMessage.includes('สำเร็จ') || resendMessage.includes('แล้ว')
-                                ? 'bg-green-50 text-green-700'
-                                : 'bg-red-50 text-red-700'
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-red-50 text-red-700'
                             }`}>
                             {resendMessage}
                         </div>
@@ -102,5 +102,21 @@ export default function VerificationPendingPage() {
                 </CardContent>
             </Card>
         </div>
+    )
+}
+
+function LoadingFallback() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-white to-blue-50">
+            <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+        </div>
+    )
+}
+
+export default function VerificationPendingPage() {
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            <VerificationPendingContent />
+        </Suspense>
     )
 }

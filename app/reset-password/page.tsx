@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, Lock, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react'
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const token = searchParams.get('token')
@@ -183,5 +183,21 @@ export default function ResetPasswordPage() {
                 </CardContent>
             </Card>
         </div>
+    )
+}
+
+function LoadingFallback() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-white to-blue-50">
+            <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+        </div>
+    )
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            <ResetPasswordContent />
+        </Suspense>
     )
 }
