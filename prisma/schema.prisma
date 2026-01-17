@@ -42,6 +42,7 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
+  emailVerified DateTime? // เวลาที่ยืนยันอีเมล (null = ยังไม่ยืนยัน)
   password      String?   // กรณีใช้ Login แบบธรรมดา (ถ้าใช้ NextAuth อาจไม่ต้องใช้)
   image         String?
   createdAt     DateTime  @default(now())
@@ -49,6 +50,28 @@ model User {
   // Relations
   ownedShops    Shop[]    @relation("Owner")
   orders        Order[]   // ประวัติการสั่งซื้อในฐานะลูกค้า
+}
+
+// Verification Token สำหรับยืนยันอีเมล
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+  
+  @@unique([email, token])
+}
+
+// Password Reset Token สำหรับรีเซ็ตรหัสผ่าน
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+  
+  @@unique([email, token])
 }
 
 model Shop {

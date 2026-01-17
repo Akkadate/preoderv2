@@ -22,6 +22,28 @@ export default function LoginPage() {
         setLoading(true)
 
         try {
+            // ตรวจสอบ credentials และ email verification ก่อน
+            const checkRes = await fetch('/api/auth/check-credentials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            })
+            const checkData = await checkRes.json()
+
+            // ถ้ายังไม่ verify email
+            if (checkData.status === 'email_not_verified') {
+                router.push(`/verification-pending?email=${encodeURIComponent(email)}`)
+                return
+            }
+
+            // ถ้า credentials ผิด
+            if (checkData.status === 'invalid_credentials') {
+                setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+                setLoading(false)
+                return
+            }
+
+            // ถ้าผ่านการตรวจสอบแล้ว ทำ signIn จริง
             const result = await signIn('credentials', {
                 email,
                 password,
@@ -29,7 +51,7 @@ export default function LoginPage() {
             })
 
             if (result?.error) {
-                setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+                setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
             } else {
                 router.push('/admin')
                 router.refresh()
@@ -87,16 +109,22 @@ export default function LoginPage() {
                             />
                         </div>
 
+                        <div className="text-right">
+                            <a href="/forgot-password" className="text-sm text-violet-600 hover:underline">
+                                ลืมรหัสผ่าน?
+                            </a>
+                        </div>
+
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             เข้าสู่ระบบ
                         </Button>
 
                         <div className="text-center text-sm text-muted-foreground mt-4">
-                            <p>Demo Account:</p>
-                            <code className="bg-muted px-2 py-1 rounded text-xs">
-                                owner@japan-preorder.com / demo123
-                            </code>
+                            ยังไม่มีบัญชี?{' '}
+                            <a href="/register" className="text-violet-600 hover:underline font-medium">
+                                สมัครสมาชิกฟรี
+                            </a>
                         </div>
                     </form>
                 </CardContent>

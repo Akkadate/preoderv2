@@ -49,17 +49,17 @@ export function AdminSidebar({ className, user, shops = [], onNavigate }: AdminS
                     </Button>
                 </Link>
 
-                <Link href="/admin/rounds" onClick={onNavigate}>
-                    <Button variant="ghost" className="w-full justify-start">
-                        <Package className="mr-2 h-4 w-4" />
-                        รอบการขาย
-                    </Button>
-                </Link>
-
                 <Link href="/admin/products" onClick={onNavigate}>
                     <Button variant="ghost" className="w-full justify-start">
                         <Package className="mr-2 h-4 w-4" />
                         สินค้า
+                    </Button>
+                </Link>
+
+                <Link href="/admin/rounds" onClick={onNavigate}>
+                    <Button variant="ghost" className="w-full justify-start">
+                        <Package className="mr-2 h-4 w-4" />
+                        รอบการขาย
                     </Button>
                 </Link>
 

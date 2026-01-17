@@ -109,3 +109,12 @@ Telegram Chat ID: 7764440784
 
 
 --------------------------------------------16/1/2026-------------
+
+resend APT re_cX8q5VAr_DLe5axxUamaoBfH4L9rtYPSM
+
+
+resend email
+เวลา Deploy ขึ้น Production:
+ต้องอัพเดท NEXT_PUBLIC_APP_URL ใน Railway:
+
+NEXT_PUBLIC_APP_URL=https://preorder24.com
